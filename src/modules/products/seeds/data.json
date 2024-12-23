@@ -1,0 +1,122 @@
+[
+  {
+    "name": "Philippines National Facebook Profile",
+    "type": "FACEBOOK_PROFILE",
+    "quantity": 45,
+    "price": 10
+  },
+  {
+    "name": "3-line identity verification FB profile",
+    "type": "FACEBOOK_PROFILE",
+    "quantity": 25,
+    "price": 12
+  },
+  {
+    "name": "2-line identity verification FB profile",
+    "type": "FACEBOOK_PROFILE",
+    "quantity": 12,
+    "price": 17
+  },
+  {
+    "name": "US Country FB Profiles",
+    "type": "FACEBOOK_PROFILE",
+    "quantity": 7,
+    "price": 20
+  },
+  {
+    "name": "EU Country FB Profiles",
+    "type": "FACEBOOK_PROFILE",
+    "quantity": 9,
+    "price": 20
+  },
+
+  {
+    "name": "Personal account with spending history limit of $50",
+    "type": "FACEBOOK_ADS_ACCOUNT",
+    "quantity": 5,
+    "price": 45
+  },
+
+  {
+    "name": "Personal account with spending history limit of $250",
+    "type": "FACEBOOK_ADS_ACCOUNT",
+    "quantity": 7,
+    "price": 95
+  },
+
+  {
+    "name": "Personal account with spending history limit of $1500",
+    "type": "FACEBOOK_ADS_ACCOUNT",
+    "quantity": 4,
+    "price": 185
+  },
+
+  {
+    "name": "Personal account with spending history limit is unlimited",
+    "type": "FACEBOOK_ADS_ACCOUNT",
+    "quantity": 3,
+    "price": 220
+  },
+
+  {
+    "name": "Personal account limit $250",
+    "type": "FACEBOOK_ADS_ACCOUNT",
+    "quantity": 1,
+    "price": 30
+  },
+
+  {
+    "name": "Unlimited personal account",
+    "type": "FACEBOOK_ADS_ACCOUNT",
+    "quantity": 0,
+    "price": 50
+  },
+  {
+    "name": "Old Page",
+    "type": "FACEBOOK_PAGES",
+    "quantity": 12,
+    "price": 15
+  },
+  {
+    "name": "Page has 3 days limited warranty",
+    "type": "FACEBOOK_PAGES",
+    "quantity": 7,
+    "price": 30
+  },
+  {
+    "name": "Pages with Flow ( Contact )",
+    "type": "FACEBOOK_PAGES",
+    "quantity": 0,
+    "price": 0
+  },
+  {
+    "name": "Mike",
+    "type": "FACEBOOK_PAGES",
+    "quantity": 0,
+    "price": 0
+  },
+  {
+    "name": "BM 1 - Limit $250 ( when paying will go to BM 5 accounts with limit $250)",
+    "type": "FACEBOOK_BUSINESS_ACCOUNT",
+    "quantity": 6,
+    "price": 50
+  },
+  {
+    "name": "BM 5 - Limit $250 (There are 5 accounts with $250 limit)",
+    "type": "FACEBOOK_BUSINESS_ACCOUNT",
+    "quantity": 8,
+    "price": 125
+  },
+  {
+    "name": "BM 1 - Unlimited (when paying will go to BM 5 account Unlimited)",
+    "type": "FACEBOOK_BUSINESS_ACCOUNT",
+    "quantity": 4,
+    "price": 85
+  },
+  {
+    "name": "BM 5 - Unlimited (There are 5 unlimited accounts)",
+    "type": "FACEBOOK_BUSINESS_ACCOUNT",
+    "quantity": 12,
+    "price": 220
+  }
+]

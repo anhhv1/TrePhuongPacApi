@@ -1,0 +1,20 @@
+[
+    {
+      "name": "Standard Delivery",
+      "description": "Delivery within 3-5 business days",
+      "price": 30000,
+      "isActive": true
+    },
+    {
+      "name": "Express Delivery", 
+      "description": "Next day delivery",
+      "price": 50000,
+      "isActive": true
+    },
+    {
+      "name": "Free Shipping",
+      "description": "Free shipping for orders over 1,000,000 VND",
+      "price": 0,
+      "isActive": true
+    }
+  ]

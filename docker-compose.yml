@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  backend: 
+    build: .
+    container_name: nestjs_api
+    environment: 
+      - PORT=${APP_PORT}
+      - JWT_SECRET_KEY=AmORAgeCyZDUwYzU3MzEzN2Q5ZjYyMjJhMDRhOTk2ZGM
+      - MONGODB_URI=mongodb+srv://anhhv:130120@cluster0.hcdhijj.mongodb.net/amor_agency?retryWrites=true&w=majority
+      - JWT_EXPIRES=1d
+      - MAILER_INCOMING_USER=anhhv@1bitlab.io
+      - MAILER_INCOMING_PASS=ljarleybszacduuj
+      - MAILER_INCOMING_PORT=587
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    command: npm run start
+    env_file:
+      - .env
+
+volumes:
+  mongodb_data_container:

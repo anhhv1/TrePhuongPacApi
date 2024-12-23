@@ -1,0 +1,77 @@
+[
+  {
+    "type": "FACEBOOK_RENTAL",
+    "category": "PERSONAL_ACCOUNT",
+    "status": "NEW",
+    "title": "Limit $50",
+    "content": "Never used before, with the ability to change time zone and currency. Can spend up to $50 USD per day. Regular spending can increase the limit."
+  },
+  {
+    "type": "FACEBOOK_RENTAL",
+    "category": "PERSONAL_ACCOUNT",
+    "status": "NEW",
+    "title": "Limit $250",
+    "content": "Never used before, with the ability to change time zone and currency. Can spend up to $250 USD per day. Regular spending can increase the limit."
+  },
+  {
+    "type": "FACEBOOK_RENTAL",
+    "category": "PERSONAL_ACCOUNT",
+    "status": "NEW",
+    "title": "Limit $1500",
+    "content": "Never used before, with the ability to change time zone and currency. Can spend up to $1500 USD per day."
+  },
+  {
+    "type": "FACEBOOK_RENTAL",
+    "category": "PERSONAL_ACCOUNT",
+    "status": "NEW",
+    "title": "No limit",
+    "content": "Never used before, with the ability to change time zone and currency. Can spend from 5000 usd to unlimited per day."
+  },
+
+  {
+    "type": "FACEBOOK_RENTAL",
+    "category": "BUSINESS_MANAGER",
+    "status": "NORMAL",
+    "title": "Limit $50",
+    "content": "Created with reputable profiles, good health, long life. Can spend up to $50 USD per day. Regular spending can increase the limit."
+  },
+  {
+    "type": "FACEBOOK_RENTAL",
+    "category": "BUSINESS_MANAGER",
+    "status": "NORMAL",
+    "title": "Limit $250",
+    "content": "Created with reputable profiles, good health, long life. Can spend up to $50 USD per day. Regular spending can increase the limit."
+  },
+  {
+    "type": "FACEBOOK_RENTAL",
+    "category": "BUSINESS_MANAGER",
+    "status": "NORMAL",
+    "title": "Limit $1500",
+    "content": "Created with reputable profiles, good health, long life. Can spend up to $1500 USD per day."
+  },
+  {
+    "type": "FACEBOOK_RENTAL",
+    "category": "BUSINESS_MANAGER",
+    "status": "NORMAL",
+    "title": "No limit",
+    "content": "Created with reputable profiles, good health, long life. Can spend from 5000 usd to unlimited per day."
+  },
+  {
+    "type": "FACEBOOK_RENTAL",
+    "category": "FANPAGE",
+    "title": "New fanpage",
+    "content": "Created on reputable profiles, can be used immediately and can be renamed, no followers."
+  },
+  {
+    "type": "FACEBOOK_RENTAL",
+    "category": "FANPAGE",
+    "title": "Old fanpage",
+    "content": "Created a long time ago and has long-standing posts, has a real following."
+  },
+  {
+    "type": "FACEBOOK_RENTAL",
+    "category": "PROFILE",
+    "title": "Profile",
+    "content": "Crafted and cared for by us, in good health, verified for instant advertising use."
+  }
+]

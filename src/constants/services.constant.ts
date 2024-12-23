@@ -1,0 +1,16 @@
+export enum EServiceType {
+  FACEBOOK_RENTAL = 'FACEBOOK_RENTAL',
+  TIKTOK_RENTAL = 'TIKTOK_RENTAL',
+}
+
+export enum EServiceStatus {
+  NEW = 'NEW',
+  NORMAL = 'NORMAL',
+}
+
+export enum EServiceCategory {
+  PERSONAL_ACCOUNT = 'PERSONAL_ACCOUNT',
+  BUSINESS_MANAGER = 'BUSINESS_MANAGER',
+  FANPAGE = 'FANPAGE',
+  PROFILE = 'PROFILE',
+}
