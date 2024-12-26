@@ -23,6 +23,7 @@ import { VnpayModule } from './modules/vnpay/vnpay.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { ShippingMethodsModule } from './modules/shipping-methods/shipping-methods.module';
 import { PromotionsModule } from './modules/promotions/promotions.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { PromotionsModule } from './modules/promotions/promotions.module';
     CategoriesModule,
     ShippingMethodsModule,
     PromotionsModule,
+    UploadModule,
   ],
   providers: [
     {
