@@ -66,6 +66,12 @@ export class ProductsController {
   remove(@Param('id') id: string) {
     return this.productsService.remove(id);
   }
+
+  @Post("import-data")
+  async importData() {
+    const basePath = '../AmorAgency-Api/src/assets';
+    return this.productsService.importData(basePath);
+  }
 }
 
 @ApiTags('[User] - Products')

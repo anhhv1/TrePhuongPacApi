@@ -1,6 +1,14 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { CreateProductDto } from './create-product.dto';
-import { IsNotEmpty, IsOptional, IsString, MaxLength, MinLength, IsMongoId } from 'class-validator';
+import { 
+  IsNotEmpty, 
+  IsOptional, 
+  IsString, 
+  MaxLength, 
+  MinLength, 
+  IsMongoId,
+  IsArray
+} from 'class-validator';
 import { Transform, TransformFnParams } from 'class-transformer';
 import { ProductType } from '~/constants';
 
@@ -47,18 +55,24 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
   discount: number;
 
   @ApiPropertyOptional({
-    example: 'https://example.com/image.jpg',
-    description: 'Product thumbnail URL'
+    type: [String],
+    example: ['thumb1.jpg', 'thumb2.jpg'],
+    description: 'Array of thumbnail image URLs'
   })
   @IsOptional()
-  thumbnail: string;
+  @IsArray()
+  @IsString({ each: true })
+  thumbnails?: string[];
 
   @ApiPropertyOptional({
-    example: 'bamboo-chair',
-    description: 'Product URL slug'
+    type: [String],
+    example: ['image1.jpg', 'image2.jpg'],
+    description: 'Array of product image URLs'
   })
   @IsOptional()
-  link: string;
+  @IsArray()
+  @IsString({ each: true })
+  images?: string[];
 
   @ApiPropertyOptional({
     example: '507f1f77bcf86cd799439011',

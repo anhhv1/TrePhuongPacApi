@@ -1,5 +1,5 @@
 import { Prop, SchemaFactory } from '@nestjs/mongoose';
-import { Document,Schema as MongooseSchema } from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseSchema } from 'src/decorators';
 import { BaseMongo } from 'src/common/dto';
@@ -29,15 +29,22 @@ export class Products extends BaseMongo {
   @ApiProperty()
   discount: number;
 
-  @Prop({ default: null })
-  @ApiProperty()
-  thumbnail: string;
+  @Prop({ type: [String], default: [] })
+  @ApiProperty({
+    type: [String],
+    description: 'Array of thumbnail image URLs',
+    example: ['image1.jpg', 'image2.jpg']
+  })
+  thumbnails: string[];
 
-  @Prop({ default: null })
-  @ApiProperty()
-  link: string;
+  @Prop({ type: [String], default: [] })
+  @ApiProperty({
+    type: [String],
+    description: 'Array of product image URLs',
+    example: ['image1.jpg', 'image2.jpg']
+  })
+  images: string[];
 
-  
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Categories', default: null })
   @ApiProperty({
     example: '507f1f77bcf86cd799439011',

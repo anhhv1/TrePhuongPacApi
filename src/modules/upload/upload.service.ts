@@ -15,7 +15,6 @@ import * as path from 'path';
 export class UploadService {
   constructor(@InjectModel(Uploads.name) private readonly uploadModel: Model<Uploads>) {}
 
-  // Tạo mới upload từ file được gửi
   async create(file: Express.Multer.File): Promise<Uploads> {
     const createUploadDto: CreateUploadDto = {
       filename: file.filename,
@@ -98,7 +97,6 @@ export class UploadService {
     return upload;
   }
 
-  // Xóa file (đánh dấu isActive = false)
   async remove(id: string): Promise<Uploads> {
     
     const upload = await this.uploadModel.findByIdAndRemove({ _id: id }
@@ -106,7 +104,7 @@ export class UploadService {
     );
     const filePath = path.resolve(upload.path);
     try {
-      fs.unlinkSync(filePath); // Remove the file from the disk
+      fs.unlinkSync(filePath); 
     } catch (error) {
       throw new BadRequestException('Error while deleting the file from the file system');
     }
@@ -115,5 +113,31 @@ export class UploadService {
       throw new NotFoundException(`File with ID "${id}" not found`);
     }
     return upload;
+  }
+  async removeAll(): Promise<AppResponse<{ deletedCount: number }>> {
+    try {
+      const uploads = await this.uploadModel.find();
+      
+      for (const upload of uploads) {
+        const filePath = path.resolve(upload.path);
+        try {
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+        } catch (error) {
+          console.error(`Error deleting file ${upload.filename}:`, error);
+        }
+      }
+
+      const result = await this.uploadModel.deleteMany({});
+
+      return {
+        content: {
+          deletedCount: result.deletedCount || 0
+        },
+      };
+    } catch (error) {
+      throw new BadRequestException('Error while deleting all files');
+    }
   }
 }

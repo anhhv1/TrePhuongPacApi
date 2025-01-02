@@ -14,7 +14,6 @@ import { ApiConsumes, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
 import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 import { diskStorage } from 'multer';
 import { FindPaginateImage } from './dto/find-paginate-image.dto';
 
@@ -43,9 +42,11 @@ export class UploadController {
       storage: diskStorage({
         destination: './uploads/images',
         filename: (req, file, cb) => {
-          const filename: string = uuidv4();
-          const extension: string = path.extname(file.originalname);
-          cb(null, `${filename}${extension}`);
+          const originalName = path.parse(file.originalname).name.replace(/\s+/g, '');
+          const extension = path.extname(file.originalname);
+          const timestamp = Math.floor(Date.now() / 1000); // Convert to Unix timestamp
+          const filename = `${originalName}_${timestamp}${extension}`;
+          cb(null, filename);
         },
       }),
       fileFilter: (req, file, cb) => {
@@ -94,5 +95,11 @@ export class UploadController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.uploadService.remove(id);
+  }
+
+  @Delete()
+  @ApiOperation({ summary: 'Delete all images' })
+  async removeAll() {
+    return this.uploadService.removeAll();
   }
 }
