@@ -9,20 +9,20 @@ import { Observable } from 'rxjs';
 import PaginationHelper from '~/helpers/pagination.helper';
 import { FindPaginateProduct } from './dto';
 import { escapeRegex } from '~/helpers';
-import { ProductType } from '~/constants';
 import { Categories } from '../categories/categories.schema';
+import { Uploads } from '../upload/upload.schema';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Uploads } from '../upload/upload.schema';
 import mime from 'mime';
+
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel(Products.name) readonly productsModel: Model<ProductsDocument>,
     @InjectModel(Categories.name) private categoryModel: Model<Categories>,
     @InjectModel(Uploads.name) private uploadModel: Model<Uploads>
+  ) { }
 
-  ) {}
   private readonly SPECIAL_CATEGORIES = ['Đũa tre', 'Thớt tre', 'Thìa', 'Bát', 'Cốc'];
 
   async create(createProductDto: CreateProductDto): Promise<AppResponse<Products> | Observable<never>> {
@@ -143,40 +143,10 @@ export class ProductsService {
   async findAll() {
     return {
       content: await this.productsModel
-        .find()
+        .find({ quantity: { $gt: 0 } }) // Only return products with quantity > 0
         .populate('categoryId', 'name')
         .sort({ createdAt: 'desc' })
         .lean({ virtuals: true }),
-    };
-  }
-
-  async findAllByType() {
-    const [FACEBOOK_PROFILE, FACEBOOK_ADS_ACCOUNT, FACEBOOK_PAGES, FACEBOOK_BUSINESS_ACCOUNT] = await Promise.all([
-      this.productsModel
-        .find({ type: ProductType.FACEBOOK_PROFILE })
-        .populate('categoryId', 'name')
-        .lean({ virtuals: true }),
-      this.productsModel
-        .find({ type: ProductType.FACEBOOK_ADS_ACCOUNT })
-        .populate('categoryId', 'name')
-        .lean({ virtuals: true }),
-      this.productsModel
-        .find({ type: ProductType.FACEBOOK_PAGES })
-        .populate('categoryId', 'name')
-        .lean({ virtuals: true }),
-      this.productsModel
-        .find({ type: ProductType.FACEBOOK_BUSINESS_ACCOUNT })
-        .populate('categoryId', 'name')
-        .lean({ virtuals: true }),
-    ]);
-
-    return {
-      content: {
-        FACEBOOK_PROFILE,
-        FACEBOOK_ADS_ACCOUNT,
-        FACEBOOK_PAGES,
-        FACEBOOK_BUSINESS_ACCOUNT,
-      },
     };
   }
 
@@ -191,30 +161,28 @@ export class ProductsService {
       content: products,
     };
   }
- 
+
   private sanitizeFileName(fileName: string): string {
     return fileName
-      .replace(/[<>:"/\\|?*]+/g, '') // Loại bỏ các ký tự không hợp lệ
-      .replace(/\s+/g, '_')          // Thay khoảng trắng bằng dấu gạch dưới
-      .replace(/,/g, '')             // Loại bỏ dấu phẩy
-      .replace(/=/g, '_')            // Thay dấu = bằng gạch dưới
-      .normalize('NFD')              // Chuẩn hóa Unicode
-      .replace(/[\u0300-\u036f]/g, '') // Loại bỏ dấu tiếng Việt
-      .replace(/đ/g, 'd').replace(/Đ/g, 'D'); // Thay thế đ/Đ
+      .replace(/[<>:"/\\|?*]+/g, '') // Remove invalid characters
+      .replace(/\s+/g, '_')          // Replace spaces with underscore
+      .replace(/,/g, '')             // Remove commas
+      .replace(/=/g, '_')            // Replace = with underscore
+      .normalize('NFD')              // Normalize Unicode
+      .replace(/[\u0300-\u036f]/g, '') // Remove Vietnamese accents
+      .replace(/đ/g, 'd').replace(/Đ/g, 'D'); // Replace đ/Đ
   }
 
   private extractCategoryName(folderName: string): string {
-    // Bỏ số thứ tự ở đầu
+    // Remove number prefix
     const nameWithoutNumber = folderName.substring(folderName.indexOf(' ') + 1);
-    
-    // Kiểm tra nếu tên thư mục chứa các category đặc biệt
+
+    // Check if folder name contains special categories
     for (const specialCat of this.SPECIAL_CATEGORIES) {
       if (nameWithoutNumber.toLowerCase().startsWith(specialCat.toLowerCase())) {
         return specialCat;
       }
     }
-
-    // Nếu không phải category đặc biệt thì trả về "Khác"
     return 'Khác';
   }
 
@@ -226,11 +194,27 @@ export class ProductsService {
         skipped: [] as string[],
         failed: [] as string[]
       };
-
-      // Group folders by category
+  
       const categoryGroups = new Map<string, string[]>();
-
-      // Phân loại các thư mục vào các nhóm category
+  
+      // Helper function to generate random product data with fixed discount rates
+      const generateRandomProductData = () => {
+        const price = Math.floor(Math.random() * (1000000 - 10000) + 10000); // Random price between 10,000 and 1,000,000
+        const quantity = Math.floor(Math.random() * 100) + 1; // Random quantity between 1 and 100
+        
+        // Fixed discount percentages
+        const discountRates = [5, 10, 15, 20];
+        const discount = discountRates[Math.floor(Math.random() * discountRates.length)];
+        // const discount = Math.floor(price * (selectedRate / 100)); // Calculate discount based on selected rate
+        
+        return {
+          price,
+          quantity,
+          discount
+        };
+      };
+  
+      // Group folders by category
       for (const folder of categories) {
         if (fs.statSync(path.join(basePath, folder)).isDirectory()) {
           const categoryName = this.extractCategoryName(folder);
@@ -240,78 +224,120 @@ export class ProductsService {
           categoryGroups.get(categoryName)?.push(folder);
         }
       }
-
-      // Import từng category và các sản phẩm của nó
+  
+      // Import each category and its products
       for (const [categoryName, folders] of categoryGroups) {
         try {
-          // Kiểm tra category đã tồn tại
-          const existingCategory = await this.categoryModel.findOne({ 
-            name: categoryName 
+          // Check if category exists
+          let existingCategory = await this.categoryModel.findOne({
+            name: categoryName
           });
-
+  
+          let category;
           if (existingCategory) {
-            console.log(`Category "${categoryName}" already exists, skipping...`);
-            importResults.skipped.push(categoryName);
-            continue;
+            category = existingCategory;
+            console.log(`Category "${categoryName}" already exists, updating...`);
+          } else {
+            const slug = this.generateSlug(categoryName);
+
+            // Create new category without image first
+            category = await this.categoryModel.create({
+              name: categoryName,
+              image: 'example.png',
+              slug: slug,
+            });
           }
-
-          // Tạo category mới
-          const newCategory = await this.categoryModel.create({
-            name: categoryName,
-          });
-
-          // Import ảnh từ tất cả thư mục của category này
+  
+          // Get first image from first folder for category thumbnail
+          const firstFolder = folders[0];
+          const folderPath = path.join(basePath, firstFolder);
+          const productImages = fs.readdirSync(folderPath);
+  
+          if (productImages.length > 0) {
+            // Upload first image as category image
+            const firstImage = productImages[0];
+            const imagePath = path.join(folderPath, firstImage);
+  
+            const timestamp = Math.floor(Date.now() / 1000);
+            const sanitizedCategory = this.sanitizeFileName(categoryName);
+            const sanitizedImageName = this.sanitizeFileName(firstImage);
+            const categoryImageName = `category_${sanitizedCategory}_${timestamp}_${sanitizedImageName}`;
+  
+            const uploadDir = './uploads/images';
+            if (!fs.existsSync(uploadDir)) {
+              fs.mkdirSync(uploadDir, { recursive: true });
+            }
+  
+            const categoryImagePath = path.join(uploadDir, categoryImageName);
+  
+            await fs.promises.copyFile(imagePath, categoryImagePath);
+            await this.categoryModel.findByIdAndUpdate({ _id: category._id }, {
+              image: categoryImageName,
+              name: category?.name,
+              slug: category?.slug || this.generateSlug(category?.name) // Ensure slug exists even when updating
+            });
+          }
+  
+          // Import products for each folder
           for (const folder of folders) {
             const folderPath = path.join(basePath, folder);
             const productImages = fs.readdirSync(folderPath);
-            
+  
             const uploadedImages = await Promise.all(
               productImages.map(async (imageName) => {
                 const imagePath = path.join(folderPath, imageName);
                 const fileStats = fs.statSync(imagePath);
-                
+  
                 const timestamp = Math.floor(Date.now() / 1000);
                 const sanitizedCategory = this.sanitizeFileName(categoryName);
                 const sanitizedImageName = this.sanitizeFileName(imageName);
                 const newFilename = `${sanitizedCategory}_${timestamp}_${sanitizedImageName}`;
-                
+  
                 const uploadDir = './uploads/images';
                 if (!fs.existsSync(uploadDir)) {
                   fs.mkdirSync(uploadDir, { recursive: true });
                 }
-                
+  
                 const uploadPath = path.join(uploadDir, newFilename);
                 await fs.promises.copyFile(imagePath, uploadPath);
-
                 const uploadData = await this.uploadModel.create({
                   filename: newFilename,
                   mimetype: mime.lookup(imagePath) || 'image/jpeg',
                   path: uploadPath,
                   size: fileStats.size,
                 });
-
+  
                 return uploadData;
               })
             );
-
-            // Tạo product cho mỗi thư mục
+  
+            // Generate random product data with fixed discount rates
+            const { price, quantity, discount } = generateRandomProductData();
+  
+            // Create product with random data
             await this.productsModel.create({
-              name: folder.substring(folder.indexOf(' ') + 1), // Tên đầy đủ của sản phẩm
-              categoryId: newCategory._id,
-              images: uploadedImages.map(img => img.path),
-              thumbnails: uploadedImages.length > 0 ? [uploadedImages[0].path] : [],
+              name: folder.substring(folder.indexOf(' ') + 1),
+              categoryId: category._id,
+              images: uploadedImages.map((image) => image.filename),
+              thumbnails: uploadedImages.length > 0 ? [uploadedImages[0]?.filename] : [],
+              price,
+              quantity,
+              discount,
+              type: categoryName // Using category name as product type
             });
+  
+            console.log(`Created product with price: ${price}, quantity: ${quantity}, discount: ${discount} (${Math.round((discount/price) * 100)}% off)`);
           }
-
+  
           console.log(`Successfully imported category: ${categoryName}`);
           importResults.success.push(categoryName);
-
+  
         } catch (error) {
           console.error(`Failed to import category ${categoryName}:`, error);
           importResults.failed.push(categoryName);
         }
       }
-
+  
       return {
         message: 'Import completed',
         results: {
@@ -326,11 +352,22 @@ export class ProductsService {
           }
         }
       };
-
+  
     } catch (error) {
       console.error('Import error:', error);
       throw error;
     }
   }
 
+  
+  private generateSlug(name: string): string {
+    return name
+      .normalize('NFD') // Normalize to decomposed form
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+      .toLowerCase() // Convert to lowercase
+      .trim() // Remove leading/trailing spaces
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/[^a-z0-9-]/g, '') // Remove any remaining non-alphanumeric characters except hyphens
+      .replace(/-+/g, '-'); // Replace multiple consecutive hyphens with a single hyphen
+  }
 }

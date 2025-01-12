@@ -7,4 +7,17 @@ export class UpdateCategoryDto {
     @IsString()
     @IsNotEmpty({ message: 'Category name cannot be empty' })
     name: string;
+
+    @ApiProperty({
+        type: String,
+        description: 'Image URLs',
+        example: "image2.jpg"
+    })
+    @IsNotEmpty({ message: 'Category image cannot be empty' })
+    image: string;
+
+    @ApiProperty()
+    @IsString()
+    @IsNotEmpty({ message: 'Category name cannot be empty' })
+    slug: string;
 }

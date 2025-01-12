@@ -15,14 +15,33 @@ export class CategoriesService {
     @InjectModel(Categories.name) readonly categoriesModel: Model<CategoriesDocument>
   ) {}
 
+  private generateSlug(name: string): string {
+    return name
+      .normalize('NFD') // Normalize to decomposed form
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+      .toLowerCase() // Convert to lowercase
+      .trim() // Remove leading/trailing spaces
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/[^a-z0-9-]/g, '') // Remove any remaining non-alphanumeric characters except hyphens
+      .replace(/-+/g, '-'); // Replace multiple consecutive hyphens with a single hyphen
+  }
+
   async create(createCategoryDto: CreateCategoryDto): Promise<AppResponse<Categories> | Observable<never>> {
-    const { name } = createCategoryDto;
+    const { name, image } = createCategoryDto;
     const nameTrim = name.trim();
+    const slug = this.generateSlug(nameTrim);
+
+    const existingSlug = await this.categoriesModel.findOne({ slug });
+    if (existingSlug) {
+      throw new BadRequestException('Category with similar name already exists');
+    }
 
     return {
       content: await this.categoriesModel.create({
         ...createCategoryDto,
         name: nameTrim,
+        slug,
+        image: image || ''
       }),
     };
   }
@@ -42,11 +61,11 @@ export class CategoriesService {
     ]);
 
     return {
-      content: PaginationHelper.getPaginationResponse({ 
-        page: page, 
-        data: categories, 
-        perPage: perPage, 
-        total: count 
+      content: PaginationHelper.getPaginationResponse({
+        page: page,
+        data: categories,
+        perPage: perPage,
+        total: count
       }),
     };
   }
@@ -77,8 +96,9 @@ export class CategoriesService {
     id: string,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<AppResponse<Categories | null> | Observable<never>> {
-    const { name } = updateCategoryDto;
+    const { name, image } = updateCategoryDto;
     const nameTrim = name.trim();
+    const slug = this.generateSlug(nameTrim);
 
     const category = await this.findByField({ _id: id });
 
@@ -86,9 +106,21 @@ export class CategoriesService {
       return category;
     }
 
-    const data: any = {
+    // Check if new slug already exists (excluding current category)
+    const existingSlug = await this.categoriesModel.findOne({
+      slug,
+      _id: { $ne: id }
+    });
+    
+    if (existingSlug) {
+      throw new BadRequestException('Category with similar name already exists');
+    }
+
+    const data = {
       ...updateCategoryDto,
-      name: nameTrim,
+      name: name,
+      slug,
+      image: image || category.image // Keep existing image if no new one provided
     };
 
     return {

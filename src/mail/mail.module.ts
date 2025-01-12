@@ -12,9 +12,9 @@ import { MailService } from './mail.service';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        const user = configService.get('MAILER_INCOMING_USER', 'anhhv@1bitlab.io');
-        const pass = configService.get('MAILER_INCOMING_PASS', 'ljarleybszacduuj');
-        const port = Number(configService.get('MAILER_INCOMING_PORT', '587'));
+        const user = configService.get('MAILER_INCOMING_USER', 'vietanh123456123@gmail.com');
+        const pass = configService.get('MAILER_INCOMING_PASS', 'jlvbetybsaglxtgw');
+        const port = Number(configService.get('MAILER_INCOMING_PORT', '465'));
         return {
           transport: {
             host: 'smtp.gmail.com',
@@ -27,7 +27,7 @@ import { MailService } from './mail.service';
             },
           },
           defaults: {
-            from: '"Amor Agency" <amor-agency@gmail.com>',
+            from: '"Amor Agency  🌟" <amor-agency@gmail.com>',
           },
           template: {
             dir: __dirname + '/templates',

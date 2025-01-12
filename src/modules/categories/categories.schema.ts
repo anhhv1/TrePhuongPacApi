@@ -9,12 +9,18 @@ export type CategoriesDocument = Categories & Document;
 
 @BaseSchema()
 export class Categories extends BaseMongo {
-  @Prop({ required: true, unique: true }) 
+  @Prop({ required: true, unique: true })
   @ApiProperty()
   name: string;
 
   @Prop()
   description?: string;
+
+  @Prop()
+  image?: string;
+
+  @Prop()
+  slug?: string;
 }
 
 export const CategoriesSchema = SchemaFactory.createForClass(Categories);

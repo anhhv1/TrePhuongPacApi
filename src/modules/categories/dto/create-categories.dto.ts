@@ -11,4 +11,18 @@ export class CreateCategoryDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @ApiProperty({
+    type: String,
+    description: 'Image URLs',
+    example: "image2.jpg"
+  })
+  @IsString()
+  @IsNotEmpty({ message: 'Category image cannot be empty' })
+  image: string;
+
+  @ApiProperty()
+  @IsString()
+  slug: string;
+
 }

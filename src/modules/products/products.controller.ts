@@ -69,26 +69,15 @@ export class ProductsController {
 
   @Post("import-data")
   async importData() {
-    const basePath = '../AmorAgency-Api/src/assets';
+    const basePath = '../TrePhuongPacApi/src/assets';
     return this.productsService.importData(basePath);
-  }
+  }   
 }
 
 @ApiTags('[User] - Products')
 @Controller('products')
 export class UserProductsController {
   constructor(private readonly productsService: ProductsService) {}
-
-  @Get('')
-  @ApiOperation({
-    operationId: 'getAllProductsByType',
-    description: 'get all products by type',
-    summary: 'Get all products by type',
-  })
-  @ApiOkResponse({ type: Products, isArray: true })
-  findAllByType() {
-    return this.productsService.findAllByType();
-  }
 
   @Get('all')
   @ApiOperation({
@@ -99,5 +88,23 @@ export class UserProductsController {
   @ApiOkResponse({ type: Products, isArray: true })
   findAll() {
     return this.productsService.findAll();
+  }
+  @Get(':id')
+  @ApiOperation({
+    summary: 'Detail products',
+  })
+  findOne(@Param() id: IdDto): Promise<AppResponse<Products> | Observable<never>> {
+    return this.productsService.findOne(id.id);
+  }
+  
+  @Get('category/:categoryId')
+  @ApiOperation({
+    operationId: 'getProductsByCategory',
+    description: 'Get products by category ID',
+    summary: 'Get products by category',
+  })
+  @ApiOkResponse({ type: Products, isArray: true })
+  findByCategory(@Param('categoryId') categoryId: string) {
+    return this.productsService.findByCategory(categoryId);
   }
 }
