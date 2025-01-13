@@ -5,6 +5,7 @@ import { PromotionsService } from './promotions.service';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
 import { UpdatePromotionDto } from './dto/update-promotion.dto';
 import { FindPaginatePromotion } from './dto/find-paginate-promotion.dto';
+import { ValidatePromotionDto } from './dto/validate.dto';
 
 @ApiTags('promotions')
 @Controller('promotions')
@@ -44,18 +45,16 @@ export class PromotionsController {
 
   @Post('validate')
   @ApiOperation({ summary: 'Validate a promotion code with order amount' })
-  async validatePromotion(
-    @Body('code') code: string,
-    @Body('orderAmount') orderAmount: number
-  ) {
+  async validatePromotion(@Body() validatePromotionDto: ValidatePromotionDto) {
+    const { code, orderAmount } = validatePromotionDto;
     await this.promotionsService.validatePromotion(code, orderAmount);
     const discount = await this.promotionsService.calculateDiscount(code, orderAmount);
-    
+
     return {
       content: {
         isValid: true,
-        discount
-      }
+        discount,
+      },
     };
   }
 

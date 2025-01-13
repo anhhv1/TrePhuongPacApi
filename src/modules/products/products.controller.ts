@@ -8,13 +8,11 @@ import { Products } from './products.schema';
 import { ProductsService } from './products.service';
 import { FindPaginateProduct, UpdateProductDto, CreateProductDto } from './dto';
 import { IdDto } from '~/common/dto';
-import { Authorize, Roles } from '~/decorators';
-import { EAccountRole } from '~/constants';
+import { Authorize } from '~/decorators';
 import { JwtAuthGuard } from '~/guards/jwtAuth.guard';
 import { RolesGuard } from '~/guards/roles.guard';
 
 @ApiTags('[Admin] - Products')
-@Roles(EAccountRole.ADMIN)
 @Authorize()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('admin/products')
