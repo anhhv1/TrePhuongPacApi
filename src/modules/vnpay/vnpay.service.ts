@@ -1,7 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
 import * as querystring from 'qs';
-import * as dateFormat from 'dateformat';
+function formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+
+  return `${year}${month}${day}${hours}${minutes}${seconds}`;
+}
 
 @Injectable()
 export class VnpayService {
@@ -13,8 +22,8 @@ export class VnpayService {
   createPaymentUrl(orderInfo: string, amount: number, bankCode?: string): any {
     const date = new Date();
     
-    const createDate = dateFormat(date, 'yyyymmddHHmmss');
-    const orderId = dateFormat(date, 'HHmmss');
+    const createDate = formatDate(date);
+    const orderId = formatDate(date);
     
     const vnp_Params = {
       vnp_Version: '2.1.0',
@@ -31,9 +40,6 @@ export class VnpayService {
       vnp_CreateDate: createDate,
     };
 
-    console.log(vnp_Params);
-    return
-    
     // Add bank code if provided
     if (bankCode && bankCode.length > 0) {
       vnp_Params['vnp_BankCode'] = bankCode;
