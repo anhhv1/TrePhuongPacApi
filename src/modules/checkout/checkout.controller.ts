@@ -10,6 +10,8 @@ export class CheckoutController {
 
   @Post()
   create(@Body() createCheckoutDto: CreateCheckoutDto) {
+
+    
     return this.checkoutService.create(createCheckoutDto);
   }
 }

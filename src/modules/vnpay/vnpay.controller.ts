@@ -9,4 +9,8 @@ export class VnpayController {
   createPaymentUrl(@Query('orderInfo') orderInfo: string, @Query('amount') amount: number) {
     return this.vnpayService.createPaymentUrl(orderInfo, amount);
   }
+  @Get('')
+  getBankList() {
+    return this.vnpayService.getBankList();
+  }
 }

@@ -22,8 +22,6 @@ export class OrdersService {
   async findByField(filter: object): Promise<Order | Observable<never>> {
     const order = await this.orderModel
       .findOne(filter)
-      .populate('promotionId', 'code name type value')
-      .populate('shippingMethodId', 'name price')
       .lean({ virtuals: true });
 
     if (!order) {
@@ -33,18 +31,24 @@ export class OrdersService {
     return order;
   }
 
-  async findPaginateOrder(dto: FindPaginateOrder, account: any = null): Promise<AppResponse<PaginationResponse<Order>>> {
-    const { page, perPage, match, skip } = PaginationHelper.getQueryByPagination<Order, FindPaginateOrder>(dto);
+  async findPaginateOrder(
+    dto: FindPaginateOrder,
+    account: any = null
+  ): Promise<AppResponse<PaginationResponse<Order>>> {
+    const { page, perPage, match, skip } = 
+      PaginationHelper.getQueryByPagination<Order, FindPaginateOrder>(dto);
 
     const { keyword, status } = dto;
 
     if (account !== null) {
-      match.email = { $regex: new RegExp(escapeRegex(account.email), 'i') };
+      match['info.email'] = { 
+        $regex: new RegExp(escapeRegex(account.email), 'i') 
+      };
     } else {
       if (keyword) {
         match.$or = [
-          { fullname: { $regex: new RegExp(escapeRegex(keyword), 'i') } },
-          { email: { $regex: new RegExp(escapeRegex(keyword), 'i') } }
+          { 'info.fullname': { $regex: new RegExp(escapeRegex(keyword), 'i') } },
+          { 'info.email': { $regex: new RegExp(escapeRegex(keyword), 'i') } }
         ];
       }
 
@@ -56,8 +60,6 @@ export class OrdersService {
     const [orders, count] = await Promise.all([
       this.orderModel
         .find(match)
-        .populate('promotionId', 'code name type value')
-        .populate('shippingMethodId', 'name price')
         .sort({ createdAt: 'desc' })
         .limit(perPage)
         .skip(skip)
@@ -66,7 +68,12 @@ export class OrdersService {
     ]);
 
     return {
-      content: PaginationHelper.getPaginationResponse({ page, data: orders, perPage, total: count }),
+      content: PaginationHelper.getPaginationResponse({ 
+        page, 
+        data: orders, 
+        perPage, 
+        total: count 
+      }),
     };
   }
 
@@ -83,15 +90,17 @@ export class OrdersService {
   }
 
   async update(id: string): Promise<AppResponse<Order | null> | Observable<never>> {
-    const order = await this.findByField({ _id: id, status: EOrderStatus.PENDING });
-    
+    const order = await this.findByField({ 
+      _id: id, 
+      status: EOrderStatus.PENDING 
+    });
+
     if (order instanceof Observable) {
       return order;
     }
 
-    // If there's a promotion, increment its usage
-    if (order.promotionId) {
-      await this.promotionsService.incrementUsage(order.promotionId.toString());
+    if (order.promotion?._id) {
+      await this.promotionsService.incrementUsage(order.promotion._id.toString());
     }
 
     const data = {
@@ -104,12 +113,10 @@ export class OrdersService {
         { $set: data },
         { new: true }
       )
-      .populate('promotionId', 'code name type value')
-      .populate('shippingMethodId', 'name price')
       .lean({ virtuals: true });
 
-    if (order.email) {
-      await this.mailService.confirmOrder(order.email);
+    if (order.info?.email) {
+      await this.mailService.confirmOrder(order.info.email);
     }
 
     return {

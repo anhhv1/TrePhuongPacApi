@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
 import * as querystring from 'qs';
+import { VnpayService as vnService } from 'nestjs-vnpay';
+import { Bank } from 'vnpay';
+
 function formatDate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -14,15 +17,19 @@ function formatDate(date: Date): string {
 
 @Injectable()
 export class VnpayService {
-  private vnp_TmnCode = 'AW624W9P';
-  private vnp_HashSecret = 'DU7ZTMH6MATAIAM1T9ZGTKD36QDTB2Q6';
+  private vnp_TmnCode = '5HC24BC1';
+  private vnp_HashSecret = '30YVAEB1W03RFU8U15JI9GCOO8S50G62';
   private vnp_Url = 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
   private vnp_ReturnUrl = 'http://localhost:3000/payment-return';
+
+  constructor(private readonly vnpayService: vnService) {}
 
   createPaymentUrl(orderInfo: string, amount: number, bankCode?: string): any {
     const date = new Date();
     
     const createDate = formatDate(date);
+ 
+    
     const orderId = formatDate(date);
     
     const vnp_Params = {
@@ -33,8 +40,8 @@ export class VnpayService {
       vnp_CurrCode: 'VND',
       vnp_TxnRef: orderId,
       vnp_OrderInfo: orderInfo,
-      vnp_OrderType: 'billpayment',
-      vnp_Amount: amount * 100,
+      vnp_OrderType: 'other',
+      vnp_Amount: amount,
       vnp_ReturnUrl: `${this.vnp_ReturnUrl}/${orderInfo}`,
       vnp_IpAddr: '127.0.0.1',
       vnp_CreateDate: createDate,
@@ -53,14 +60,15 @@ export class VnpayService {
     
     // Create SHA512 hash
     const hmac = crypto.createHmac('sha512', this.vnp_HashSecret);
-    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
     
+    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
+
     // Add secure hash to parameters
     vnp_Params['vnp_SecureHash'] = signed;
     
     // Build final URL
     const finalUrl = `${this.vnp_Url}?${querystring.stringify(vnp_Params, { encode: false })}`;
-
+    
     return {
       code: '00',
       content: finalUrl,
@@ -85,5 +93,12 @@ export class VnpayService {
       sorted[str[key]] = encodeURIComponent(obj[str[key]]).replace(/%20/g, '+');
     }
     return sorted;
+  }
+
+  async getBankList() {
+    const bankList: Bank[] = await this.vnpayService.getBankList();
+    console.log("123123213",bankList);
+    
+    return bankList
   }
 }

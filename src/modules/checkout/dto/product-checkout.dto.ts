@@ -3,13 +3,16 @@ import { IsMongoId, IsNotEmpty } from 'class-validator';
 
 export class ProductCheckout {
   @ApiProperty()
-  @IsMongoId({ message: 'ID is not match' })
-  @IsNotEmpty({ message: 'ID is required' })
   productId: string;
 
   @ApiProperty()
-  @IsNotEmpty({ message: 'Total is required' })
-  total: number;
+  @IsNotEmpty({ message: 'name is required' })
+  name: string;
+
+
+  @ApiProperty()
+  @IsNotEmpty({ message: 'quantity is required' })
+  quantity: number;
 
   @ApiProperty()
   @IsNotEmpty({ message: 'Price is required' })
@@ -17,5 +20,5 @@ export class ProductCheckout {
 
   @ApiProperty({ default: 0 })
   @ApiProperty()
-  discount: number;
+  discount?: number;
 }

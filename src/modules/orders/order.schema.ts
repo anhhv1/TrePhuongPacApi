@@ -6,109 +6,128 @@ import { BaseMongo } from 'src/common/dto';
 import mongooseLeanVirtuals from 'mongoose-lean-virtuals';
 import { EOrderStatus } from '~/constants';
 
+export interface IOrderProduct {
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  total: number;
+}
+
+export interface IShippingMethod {
+  _id: MongooseSchema.Types.ObjectId;
+  name: string;
+  price: number;
+  description: string;
+}
+
+export interface IPromotion {
+  _id: MongooseSchema.Types.ObjectId;
+  code: string;
+  discount: number;
+}
+
+export interface IOrderInfo {
+  userId: string;
+  fullname: string;
+  email: string;
+  phone: string;
+  company?: string;
+  country: string;
+  contact: string;
+  note?: string;
+}
+
 export type OrderDocument = Order & Document;
 
 @BaseSchema()
 export class Order extends BaseMongo {
-  @Prop({ required: true })
+  @Prop({ type: Object, required: true })
   @ApiProperty({
-    example: '507f1f77bcf86cd799439011',
-    description: 'User ID'
+    example: {
+      fullname: 'John Doe',
+      email: 'john@example.com',
+      phone: '+84123456789',
+      company: 'Company Name',
+      country: 'Vietnam',
+      contact: 'telegram: @johndoe',
+      note: 'Special delivery instructions'
+    },
+    description: 'Customer information'
   })
-  userId: string;
+  info: IOrderInfo;
 
-  @Prop({ required: true })
+  @Prop({ type: Array, required: true })
   @ApiProperty({
-    example: 'John Doe',
-    description: 'Customer full name'
+    example: [{
+      productId: '507f1f77bcf86cd799439011',
+      name: 'Product Name',
+      price: 100000,
+      quantity: 2,
+      total: 200000
+    }],
+    description: 'Array of ordered products'
   })
-  fullname: string;
-
-  @Prop({ default: null })
-  @ApiProperty({
-    example: 'john@example.com',
-    description: 'Customer email'
-  })
-  email: string;
-
-  @Prop({ required: true })
-  @ApiProperty({
-    example: ['507f1f77bcf86cd799439011'],
-    description: 'Array of product IDs'
-  })
-  products: string[];
+  products: IOrderProduct[];
 
   @Prop({ default: EOrderStatus.PENDING })
-  @ApiProperty({ 
-    enum: EOrderStatus, 
+  @ApiProperty({
+    enum: EOrderStatus,
     default: EOrderStatus.PENDING,
-    description: 'Order status' 
+    description: 'Order status'
   })
   status: EOrderStatus;
 
   @Prop({ default: 0 })
   @ApiProperty({
     example: 299000,
-    description: 'Subtotal amount before discount'
+    description: 'Subtotal amount before shipping and discount'
   })
   subtotal: number;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Promotions', default: null })
+  @Prop({ type: Object, default: null })
   @ApiProperty({
-    example: '507f1f77bcf86cd799439011',
-    description: 'Applied promotion ID'
+    example: {
+      _id: '507f1f77bcf86cd799439011',
+      code: 'SUMMER2023',
+      discount: 50000
+    },
+    description: 'Applied promotion information'
   })
-  promotionId: MongooseSchema.Types.ObjectId;
+  promotion: IPromotion;
+
+  @Prop({ type: Object, default: null })
+  @ApiProperty({
+    example: {
+      _id: '507f1f77bcf86cd799439011',
+      name: 'Express Delivery',
+      price: 30000,
+      description: 'Next day delivery'
+    },
+    description: 'Shipping method information'
+  })
+  shippingMethod: IShippingMethod;
 
   @Prop({ default: 0 })
   @ApiProperty({
-    example: 50000,
-    description: 'Discount amount from promotion'
+    example: 279000,
+    description: 'Total amount after shipping and discount'
   })
-  discountAmount: number;
+  total: number;
 
-  @Prop({ default: 0 })
-  @ApiProperty({
-    example: 249000,
-    description: 'Total amount after discount'
-  })
-  totalAmount: number;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'ShippingMethods', default: null })
+  @Prop({ type: Object, default: null })
   @ApiProperty({
-    example: '507f1f77bcf86cd799439011',
-    description: 'Shipping method ID'
+    example: {
+      vnp_TxnRef: '123456789',
+      vnp_Amount: '27900000',
+      vnp_ResponseCode: '00'
+    },
+    description: 'Payment transaction details'
   })
-  shippingMethodId: MongooseSchema.Types.ObjectId;
-
-  @Prop({ default: 0 })
-  @ApiProperty({
-    example: 30000,
-    description: 'Shipping fee'
-  })
-  shippingFee: number;
-
-  @Prop({ default: null })
-  @ApiProperty({
-    example: '123 Street, City',
-    description: 'Shipping address'
-  })
-  shippingAddress: string;
-
-  @Prop({ default: 'COD' })
-  @ApiProperty({
-    example: 'COD',
-    description: 'Payment method'
-  })
-  paymentMethod: string;
-
-  @Prop({ default: 'PENDING' })
-  @ApiProperty({
-    example: 'PENDING',
-    description: 'Payment status'
-  })
-  paymentStatus: string;
+  paymentDetails: Record<string, any>;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
 OrderSchema.plugin(mongooseLeanVirtuals);
+
