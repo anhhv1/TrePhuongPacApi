@@ -13,7 +13,6 @@ export class UpdateCategoryDto {
         description: 'Image URLs',
         example: "image2.jpg"
     })
-    @IsNotEmpty({ message: 'Category image cannot be empty' })
     image: string;
 
     @ApiProperty()
