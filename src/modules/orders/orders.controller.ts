@@ -1,6 +1,6 @@
-import { Controller, Get, Put, Param, Query, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Put, Param, Query, Delete, UseGuards, Body } from '@nestjs/common';
 import { OrdersService } from './orders.service';
-import { FindPaginateOrder } from './dto';
+import { FindPaginateOrder, UpdateOrderDto } from './dto';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Order } from './order.schema';
 import { AppResponse } from '~/common/interfaces';
@@ -18,7 +18,7 @@ import { Account } from '../account/account.schema';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('admin/orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) { }
+  constructor(private readonly ordersService: OrdersService) {}
 
   @Get()
   @ApiOperation({
@@ -41,8 +41,11 @@ export class OrdersController {
   @ApiOperation({
     summary: 'Update order',
   })
-  update(@Param() id: IdDto): Promise<AppResponse<Order | null> | Observable<never>> {
-    return this.ordersService.update(id.id);
+  update(
+    @Param() id: IdDto,
+    @Body() updateOrderDto: UpdateOrderDto,
+  ): Promise<AppResponse<Order | null> | Observable<never>> {
+    return this.ordersService.update(id.id, updateOrderDto.status);
   }
 
   @Delete(':id')
@@ -57,7 +60,7 @@ export class OrdersController {
 @ApiTags('[User] - Orders')
 @Controller('order')
 export class UserOrdersController {
-  constructor(private readonly ordersService: OrdersService) { }
+  constructor(private readonly ordersService: OrdersService) {}
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT')
@@ -66,17 +69,20 @@ export class UserOrdersController {
   @ApiOperation({
     summary: 'Get paginate order',
   })
-  findPaginateProducts(@Query() dto: FindPaginateOrder, @CurrentAccount() account: Account): Promise<AppResponse<PaginationResponse<Order>>> {
+  findPaginateProducts(
+    @Query() dto: FindPaginateOrder,
+    @CurrentAccount() account: Account,
+  ): Promise<AppResponse<PaginationResponse<Order>>> {
     console.log(account);
 
     return this.ordersService.findPaginateOrder(dto, account);
   }
 
-  @Put(':id')
-  @ApiOperation({
-    summary: 'Update order',
-  })
-  update(@Param() id: IdDto): Promise<AppResponse<Order | null> | Observable<never>> {
-    return this.ordersService.update(id.id);
-  }
+  // @Put(':id')
+  // @ApiOperation({
+  //   summary: 'Update order',
+  // })
+  // update(@Param() id: IdDto): Promise<AppResponse<Order | null> | Observable<never>> {
+  //   return this.ordersService.update(id.id);
+  // }
 }

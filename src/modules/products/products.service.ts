@@ -102,8 +102,6 @@ export class ProductsService {
     id: string,
     updateProductDto: UpdateProductDto,
   ): Promise<AppResponse<Products | null> | Observable<never>> {
-    const { name } = updateProductDto;
-
     const product = await this.findByField({ _id: id });
 
     if (product instanceof Observable) {
@@ -111,10 +109,6 @@ export class ProductsService {
     }
 
     const data: any = { ...updateProductDto };
-
-    if (name) {
-      data.name = name.trim();
-    }
 
     const updatedProduct = await this.productsModel
       .findByIdAndUpdate({ _id: id }, { $set: data }, { new: true })
@@ -276,6 +270,12 @@ export class ProductsService {
               name: category?.name,
               slug: category?.slug || this.generateSlug(category?.name) // Ensure slug exists even when updating
             });
+            await this.uploadModel.create({
+              filename: categoryImageName,
+              mimetype: mime.lookup(imagePath) || 'image/jpeg',
+              path: categoryImagePath,
+              size: fs.statSync(imagePath).size,
+            });
           }
   
           // Import products for each folder
@@ -319,6 +319,7 @@ export class ProductsService {
               name: folder.substring(folder.indexOf(' ') + 1),
               categoryId: category._id,
               images: uploadedImages.map((image) => image.filename),
+              imageIds: uploadedImages.map((image) => image._id),
               thumbnails: uploadedImages.length > 0 ? [uploadedImages[0]?.filename] : [],
               price,
               quantity,

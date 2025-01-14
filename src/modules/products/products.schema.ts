@@ -51,6 +51,13 @@ export class Products extends BaseMongo {
     description: 'Category ID of the product'
   })
   categoryId: MongooseSchema.Types.ObjectId;
+
+  @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'imageIds', default: [] })
+  @ApiProperty({
+    example: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
+    description: 'Array of image IDs for the product',
+  })
+  imageIds: MongooseSchema.Types.ObjectId[];
 }
 
 export const ProductsSchema = SchemaFactory.createForClass(Products);

@@ -11,9 +11,7 @@ import { CreateCategoryDto, UpdateCategoryDto } from './dto';
 
 @Injectable()
 export class CategoriesService {
-  constructor(
-    @InjectModel(Categories.name) readonly categoriesModel: Model<CategoriesDocument>
-  ) {}
+  constructor(@InjectModel(Categories.name) readonly categoriesModel: Model<CategoriesDocument>) {}
 
   private generateSlug(name: string): string {
     return name
@@ -41,7 +39,7 @@ export class CategoriesService {
         ...createCategoryDto,
         name: nameTrim,
         slug,
-        image: image || ''
+        image: image || '',
       }),
     };
   }
@@ -65,7 +63,7 @@ export class CategoriesService {
         page: page,
         data: categories,
         perPage: perPage,
-        total: count
+        total: count,
       }),
     };
   }
@@ -96,9 +94,9 @@ export class CategoriesService {
     id: string,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<AppResponse<Categories | null> | Observable<never>> {
-    const { name, image } = updateCategoryDto;
+    const { name, image, slug } = updateCategoryDto;
     const nameTrim = name.trim();
-    const slug = this.generateSlug(nameTrim);
+    const slug2 = this.generateSlug(nameTrim);
 
     const category = await this.findByField({ _id: id });
 
@@ -109,9 +107,9 @@ export class CategoriesService {
     // Check if new slug already exists (excluding current category)
     const existingSlug = await this.categoriesModel.findOne({
       slug,
-      _id: { $ne: id }
+      _id: { $ne: id },
     });
-    
+
     if (existingSlug) {
       throw new BadRequestException('Category with similar name already exists');
     }
@@ -119,8 +117,8 @@ export class CategoriesService {
     const data = {
       ...updateCategoryDto,
       name: name,
-      slug,
-      image: image || category.image // Keep existing image if no new one provided
+      slug: slug ? slug : slug2,
+      image: image || category.image, // Keep existing image if no new one provided
     };
 
     return {

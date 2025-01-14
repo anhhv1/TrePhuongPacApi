@@ -67,7 +67,7 @@ export class ProductsController {
 
   @Post("import-data")
   async importData() {
-    const basePath = '../TrePhuongPacApi/src/assets';
+    const basePath = '../AmorAgency-Api/src/assets';
     return this.productsService.importData(basePath);
   }   
 }

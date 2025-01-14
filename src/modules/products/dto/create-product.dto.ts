@@ -27,7 +27,7 @@ export class CreateProductDto {
   @ApiPropertyOptional({ enum: ProductType })
   @IsString()
   @IsOptional()
-  type: string;
+  type?: string;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -51,17 +51,17 @@ export class CreateProductDto {
   @ApiProperty({
     type: [String],
     description: 'Array of thumbnail image URLs',
-    example: ['thumb1.jpg', 'thumb2.jpg']
+    example: ['thumb1.jpg', 'thumb2.jpg'],
   })
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  thumbnails?: string[];
+  thumbnails: string[] = [];
 
   @ApiProperty({
     type: [String],
     description: 'Array of product image URLs',
-    example: ['image1.jpg', 'image2.jpg']
+    example: ['image1.jpg', 'image2.jpg'],
   })
   @IsArray()
   @IsString({ each: true })
@@ -70,9 +70,19 @@ export class CreateProductDto {
 
   @ApiPropertyOptional({
     example: '507f1f77bcf86cd799439011',
-    description: 'Category ID of the product'
+    description: 'Category ID of the product',
   })
   @IsMongoId()
   @IsOptional()
   categoryId?: string;
+
+  @ApiProperty({
+    type: [String],
+    description: 'Array of image IDs associated with the product',
+    example: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
+  })
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsOptional()
+  imageIds?: string[];
 }

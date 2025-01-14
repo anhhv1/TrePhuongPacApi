@@ -22,7 +22,5 @@ export class CreateCategoryDto {
   image: string;
 
   @ApiProperty()
-  @IsString()
-  slug: string;
-
+  slug?: string;
 }
