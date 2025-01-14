@@ -24,12 +24,15 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { ShippingMethodsModule } from './modules/shipping-methods/shipping-methods.module';
 import { PromotionsModule } from './modules/promotions/promotions.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { StatisticsModule } from './modules/statistics/statistics.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     MailModule,
     DatabaseModule,
     LoggerModule,
@@ -50,6 +53,7 @@ import { UploadModule } from './modules/upload/upload.module';
     ShippingMethodsModule,
     PromotionsModule,
     UploadModule,
+    StatisticsModule,
   ],
   providers: [
     {
