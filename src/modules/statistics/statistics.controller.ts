@@ -1,6 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Res } from '@nestjs/common';
 import { StatisticsService } from './statistics.service';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { Response } from 'express';
 
 @Controller('statistics')
 @ApiTags('Statistics')
@@ -9,25 +10,27 @@ export class StatisticsController {
 
   @Get('orders')
   @ApiOperation({ summary: 'Get order statistics' })
-  @ApiQuery({ name: 'startDate', type: String })
-  @ApiQuery({ name: 'endDate', type: String })
-  async getOrderStats(
-    @Query('startDate') startDate: string,
-    @Query('endDate') endDate: string
-  ) {
+  @ApiQuery({
+    name: 'startDate',
+    type: String,
+    example: '2025-01-01',
+    description: 'Start date in format YYYY-MM-DD',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    type: String,
+    example: '2025-01-31',
+    description: 'End date in format YYYY-MM-DD',
+  })
+  async getOrderStats(@Query('startDate') startDate: string, @Query('endDate') endDate: string) {
+    const datas = {
+      sales: await this.statisticsService.getOrderSalesStats(new Date(startDate), new Date(endDate)),
+      status: await this.statisticsService.getOrderStatusStats(new Date(startDate), new Date(endDate)),
+      growth: await this.statisticsService.getOrderGrowthStats(new Date(startDate), new Date(endDate)),
+    };
+
     return {
-      sales: await this.statisticsService.getOrderSalesStats(
-        new Date(startDate),
-        new Date(endDate)
-      ),
-      status: await this.statisticsService.getOrderStatusStats(
-        new Date(startDate),
-        new Date(endDate)
-      ),
-      growth: await this.statisticsService.getOrderGrowthStats(
-        new Date(startDate),
-        new Date(endDate)
-      )
+      content: datas,
     };
   }
 
@@ -35,9 +38,11 @@ export class StatisticsController {
   @ApiOperation({ summary: 'Get product statistics' })
   async getProductStats() {
     return {
-      topSelling: await this.statisticsService.getTopSellingProducts(),
-      categoryDistribution: await this.statisticsService.getProductCategoryDistribution(),
-      inventory: await this.statisticsService.getInventoryStats()
+      content: {
+        topSelling: await this.statisticsService.getTopSellingProducts(),
+        categoryDistribution: await this.statisticsService.getProductCategoryDistribution(),
+        inventory: await this.statisticsService.getInventoryStats(),
+      },
     };
   }
 
@@ -45,9 +50,10 @@ export class StatisticsController {
   @ApiOperation({ summary: 'Get customer statistics' })
   async getCustomerStats() {
     return {
-      topCustomers: await this.statisticsService.getTopCustomers(),
-      newVsReturning: await this.statisticsService.getCustomerTypeDistribution(),
-      growth: await this.statisticsService.getCustomerGrowthStats()
+      content: {
+        topCustomers: await this.statisticsService.getTopCustomers(),
+        growth: await this.statisticsService.getCustomerGrowthStats(),
+      },
     };
   }
 
@@ -55,9 +61,11 @@ export class StatisticsController {
   @ApiOperation({ summary: 'Get promotion statistics' })
   async getPromotionStats() {
     return {
-      usage: await this.statisticsService.getPromotionUsageStats(),
-      impact: await this.statisticsService.getPromotionImpactStats(),
-      topPromotions: await this.statisticsService.getTopPromotions()
+      content: {
+        usage: await this.statisticsService.getPromotionUsageStats(),
+        impact: await this.statisticsService.getPromotionImpactStats(),
+        topPromotions: await this.statisticsService.getTopPromotions(),
+      },
     };
   }
 
@@ -65,50 +73,37 @@ export class StatisticsController {
   @ApiOperation({ summary: 'Get shipping method statistics' })
   async getShippingStats() {
     return {
-      methodUsage: await this.statisticsService.getShippingMethodUsage(),
-      revenue: await this.statisticsService.getShippingRevenue(),
-      distribution: await this.statisticsService.getShippingDistribution()
-    };
-  }
-
-  @Get('feedback')
-  @ApiOperation({ summary: 'Get feedback statistics' })
-  async getFeedbackStats() {
-    return {
-      ratings: await this.statisticsService.getRatingDistribution(),
-      trends: await this.statisticsService.getFeedbackTrends(),
-      summary: await this.statisticsService.getFeedbackSummary()
+      content: {
+        methodUsage: await this.statisticsService.getShippingMethodUsage(),
+      },
     };
   }
 
   @Get('export')
   @ApiOperation({ summary: 'Export statistics report' })
   @ApiQuery({ name: 'type', enum: ['excel', 'pdf', 'csv'] })
-  @ApiQuery({ name: 'startDate', type: String })
-  @ApiQuery({ name: 'endDate', type: String })
+  @ApiQuery({
+    name: 'startDate',
+    type: String,
+    example: '2025-01-01',
+    description: 'Start date in format YYYY-MM-DD',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    type: String,
+    example: '2025-01-31',
+    description: 'End date in format YYYY-MM-DD',
+  })
   async exportStats(
     @Query('type') type: string,
     @Query('startDate') startDate: string,
-    @Query('endDate') endDate: string
+    @Query('endDate') endDate: string,
+    @Res() res: Response
   ) {
-    return this.statisticsService.exportStatistics(
-      type,
-      new Date(startDate),
-      new Date(endDate)
-    );
-  }
-
-  @Get('dashboard/overview')
-  @ApiOperation({ summary: 'Get dashboard overview' })
-  async getDashboardOverview() {
-    const today = new Date();
-    const thirtyDaysAgo = new Date(today.setDate(today.getDate() - 30));
-
+    await this.statisticsService.exportStatistics(type, new Date(startDate), new Date(endDate),res);
+    
     return {
-      revenueOverview: await this.statisticsService.getRevenueOverview(thirtyDaysAgo, today),
-      orderOverview: await this.statisticsService.getOrderOverview(thirtyDaysAgo, today),
-      productOverview: await this.statisticsService.getProductOverview(),
-      customerOverview: await this.statisticsService.getCustomerOverview(thirtyDaysAgo, today)
+      message: 1,
     };
   }
 
@@ -116,10 +111,10 @@ export class StatisticsController {
   @ApiOperation({ summary: 'Get dashboard charts data' })
   async getDashboardCharts() {
     return {
-      salesChart: await this.statisticsService.getSalesChartData(),
-      orderStatusChart: await this.statisticsService.getOrderStatusChartData(),
-      topProductsChart: await this.statisticsService.getTopProductsChartData(),
-      customerGrowthChart: await this.statisticsService.getCustomerGrowthChartData()
+      content: {
+        orderStatusChart: await this.statisticsService.getOrderStatusChartData(),
+        topProductsChart: await this.statisticsService.getTopProductsChartData(),
+      },
     };
   }
 }

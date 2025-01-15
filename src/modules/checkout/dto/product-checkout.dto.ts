@@ -3,7 +3,7 @@ import { IsMongoId, IsNotEmpty } from 'class-validator';
 
 export class ProductCheckout {
   @ApiProperty()
-  productId: string;
+  id: string;
 
   @ApiProperty()
   @IsNotEmpty({ message: 'name is required' })

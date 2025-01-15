@@ -27,12 +27,12 @@ export class CheckoutService {
         status: EOrderStatus.PENDING,
       });
 
-      if (existingOrder) {
-        throw new BadRequestException('Order exist!');
-      }
+      // if (existingOrder) {
+      //   throw new BadRequestException('Order exist!');
+      // }
 
       const transformedProducts = products.map((product) => ({
-        productId: product.productId,
+        productId: product.id,
         name: product.name,
         price: product.price * (1 - (product.discount || 0) / 100),
         quantity: product.quantity,

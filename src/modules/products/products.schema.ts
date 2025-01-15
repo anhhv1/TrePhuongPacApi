@@ -1,5 +1,5 @@
 import { Prop, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
+import mongoose, { Document, Schema as MongooseSchema } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseSchema } from 'src/decorators';
 import { BaseMongo } from 'src/common/dto';
@@ -33,7 +33,7 @@ export class Products extends BaseMongo {
   @ApiProperty({
     type: [String],
     description: 'Array of thumbnail image URLs',
-    example: ['image1.jpg', 'image2.jpg']
+    example: ['image1.jpg', 'image2.jpg'],
   })
   thumbnails: string[];
 
@@ -41,16 +41,16 @@ export class Products extends BaseMongo {
   @ApiProperty({
     type: [String],
     description: 'Array of product image URLs',
-    example: ['image1.jpg', 'image2.jpg']
+    example: ['image1.jpg', 'image2.jpg'],
   })
   images: string[];
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Categories', default: null })
   @ApiProperty({
     example: '507f1f77bcf86cd799439011',
-    description: 'Category ID of the product'
+    description: 'Category ID of the product',
   })
-  categoryId: MongooseSchema.Types.ObjectId;
+  categoryId: { type: MongooseSchema.Types.ObjectId, ref: 'Category'; name: string };
 
   @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'imageIds', default: [] })
   @ApiProperty({
